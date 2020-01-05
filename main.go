@@ -23,28 +23,29 @@ func main() {
 	client := new(http.Client)
 	rsp, err := client.Do(req)
 	if err != nil {
-        fmt.Printf("client do err : %s", err)
+		fmt.Printf("client do err : %s", err)
 		panic(err)
 	}
-	defer rsp.Body.Close()
 
-
-	if err := decodeBody(rsp, []TTransaction{}); err != nil {
-        fmt.Printf("decode err : %s", err)
+	var transactions []TTransaction
+	if err := decodeBody(rsp, &transactions); err != nil {
+		fmt.Printf("decode err : %s", err)
 		panic(err)
 	}
-    fmt.Println(rsp)
+	for _, v := range transactions {
+		fmt.Println(v.TransactionID)
+	}
 }
 
 func decodeBody(resp *http.Response, out interface{}) error {
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
-	return decoder.Decode(out)
+	decoder.Decode(out)
+	return nil
 }
 
-
 type TTransaction struct {
-	TransactionID string
+	TransactionID string `json:"transaction_id"`
 	IkasaID       string
 	Ksid          int
 	RentedAt      time.Time
